@@ -23,7 +23,7 @@ const getProfile = async (req, res) => {
 // PUT /api/user/profile
 const updateProfile = async (req, res) => {
     try {
-        const { name, phone, age, gender, fitnessGoal } = req.body;
+        const { name, phone, age, gender, fitnessGoal, membershipPlan } = req.body;
 
         const user = await User.findById(req.user.id);
         if (!user) {
@@ -35,6 +35,7 @@ const updateProfile = async (req, res) => {
         if (age) user.age = age;
         if (gender) user.gender = gender;
         if (fitnessGoal) user.fitnessGoal = fitnessGoal;
+        if (membershipPlan) user.membershipPlan = membershipPlan;
 
         await user.save();
 
@@ -48,7 +49,8 @@ const updateProfile = async (req, res) => {
                 phone: user.phone,
                 age: user.age,
                 gender: user.gender,
-                fitnessGoal: user.fitnessGoal
+                fitnessGoal: user.fitnessGoal,
+                membershipPlan: user.membershipPlan
             },
         });
     } catch (error) {

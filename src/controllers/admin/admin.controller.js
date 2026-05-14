@@ -1,6 +1,6 @@
 // src/controllers/admin.controller.js
-const Admin = require("../models/adminModel");
-const User = require("../models/userModel");
+const Admin = require("../../models/adminModel");
+const User = require("../../models/userModel");
 
 // GET /api/admin/profile
 const getAdminProfile = async (req, res) => {

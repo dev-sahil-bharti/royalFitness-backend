@@ -1,5 +1,5 @@
 // src/controllers/adminAuth.controller.js
-const Admin = require("../models/adminModel");
+const Admin = require("../../models/adminModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -81,4 +81,39 @@ const loginAdmin = async (req, res) => {
     }
 };
 
-module.exports = { registerAdmin, loginAdmin };
+// PUT  /api/admin/changePassword
+const adminChangePassword = async (req, res) => {
+    try {
+        const { email, oldPassword, newPassword, confirmPassword } = req.body;
+        const admin = await Admin.findOne({ email });
+        if (!admin) {
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
+        }
+        const isMatch = await bcrypt.compare(oldPassword, admin.password);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Invalid email or password" });
+        }
+        if (newPassword !== confirmPassword) {
+            return res.status(400).json({ success: false, message: "Passwords do not match" });
+        }
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        admin.password = hashedPassword;
+        await admin.save();
+        return res.status(200).json({
+            success: true,
+            message: "Password changed successfully",
+            data: {
+                _id: admin._id,
+                name: admin.name,
+                email: admin.email,
+                gender: admin.gender,
+                token: generateToken(admin._id),
+            },
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { registerAdmin, loginAdmin, adminChangePassword };

@@ -1,5 +1,5 @@
 // src/controllers/user.controller.js
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const bcrypt = require("bcryptjs");
 
 // GET /api/user/profile

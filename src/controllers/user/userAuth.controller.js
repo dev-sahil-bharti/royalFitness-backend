@@ -1,5 +1,5 @@
 // src/controllers/userAuth.controller.js
-const User = require("../models/userModel");
+const User = require("../../models/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
@@ -128,4 +128,39 @@ const googleLoginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, googleLoginUser };
+// PUT /api/auth/user/changePassword
+const userChangePassword = async (req, res) => {
+  try {
+          const { email, oldPassword, newPassword, confirmPassword } = req.body;
+          const user = await User.findOne({ email });
+          if (!user) {
+              return res.status(401).json({ success: false, message: "Invalid email or password" });
+          }
+          const isMatch = await bcrypt.compare(oldPassword, user.password);
+          if (!isMatch) {
+              return res.status(401).json({ success: false, message: "Invalid email or password" });
+          }
+          if (newPassword !== confirmPassword) {
+              return res.status(400).json({ success: false, message: "Passwords do not match" });
+          }
+          const salt = await bcrypt.genSalt(10);
+          const hashedPassword = await bcrypt.hash(newPassword, salt);
+          user.password = hashedPassword;
+          await user.save();
+          return res.status(200).json({
+              success: true,
+              message: "Password changed successfully",
+              data: {
+                  _id: user._id,
+                  name: user.name,
+                  email: user.email,
+                  gender: user.gender,
+                  token: generateToken(user._id),
+              },
+          });
+      } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, googleLoginUser, userChangePassword };

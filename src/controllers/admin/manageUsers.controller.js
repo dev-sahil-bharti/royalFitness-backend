@@ -1,5 +1,6 @@
 // src/controllers/admin/manageUsers.controller.js
 const User = require("../../models/userModel");
+const bcrypt = require("bcryptjs");
 
 // GET /api/admin/users
 // Supports query: ?search=john&status=active
@@ -189,6 +190,47 @@ const deactivateMembership = async (req, res) => {
     }
 };
 
+// POST /api/admin/users
+const createUser = async (req, res) => {
+    try {
+        const { name, email, password, phone, age, gender } = req.body;
+
+        if (!name || !email || !password || !phone || !age) {
+            return res.status(400).json({ success: false, message: "Please populate all mandatory fields." });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "This email address is already mapped to another member." });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        const newUser = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            phone,
+            age,
+            gender: gender || "Male",
+            confirmPassword: hashedPassword,
+        });
+
+        const userPayload = newUser.toObject();
+        delete userPayload.password;
+        delete userPayload.confirmPassword;
+
+        return res.status(201).json({
+            success: true,
+            message: "User registry added successfully!",
+            data: userPayload,
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     getUsers,
     getUserDetails,
@@ -196,5 +238,6 @@ module.exports = {
     deleteUser,
     toggleBlockUser,
     activateMembership,
-    deactivateMembership
+    deactivateMembership,
+    createUser
 };

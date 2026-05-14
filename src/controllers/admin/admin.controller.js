@@ -20,20 +20,4 @@ const getAdminProfile = async (req, res) => {
     }
 };
 
-// GET /api/admin/users
-const getAllUsers = async (req, res) => {
-    try {
-        const users = await User.find({}).select("-password -confirmPassword");
-
-        return res.status(200).json({
-            success: true,
-            message: "Users fetched successfully",
-            count: users.length,
-            data: users,
-        });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-module.exports = { getAdminProfile, getAllUsers };
+module.exports = { getAdminProfile };

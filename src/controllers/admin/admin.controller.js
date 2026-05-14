@@ -20,4 +20,29 @@ const getAdminProfile = async (req, res) => {
     }
 };
 
-module.exports = { getAdminProfile };
+// PUT /api/admin/profile
+const updateAdminProfile = async (req, res) => {
+    try {
+        const { name, phone, age, gender } = req.body;
+        
+        const updatedAdmin = await Admin.findByIdAndUpdate(
+            req.admin.id,
+            { name, phone, age, gender },
+            { new: true, runValidators: true }
+        ).select("-password -confirmPassword");
+
+        if (!updatedAdmin) {
+            return res.status(404).json({ success: false, message: "Admin not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Admin profile updated successfully",
+            data: updatedAdmin,
+        });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { getAdminProfile, updateAdminProfile };

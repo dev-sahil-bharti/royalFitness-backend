@@ -41,7 +41,7 @@ const getUserDetails = async (req, res) => {
     try {
         const { id } = req.params;
         const user = await User.findById(id).select("-password -confirmPassword").populate("membershipPlan");
-        
+
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
@@ -69,7 +69,7 @@ const updateUser = async (req, res) => {
         }
 
         const user = await User.findByIdAndUpdate(id, updates, { new: true, runValidators: true }).select("-password -confirmPassword");
-        
+
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
@@ -142,7 +142,7 @@ const activateMembership = async (req, res) => {
         }
 
         user.membershipStatus = "active";
-        
+
         // Optionally set start date to now if not set
         if (!user.membershipStartDate) {
             user.membershipStartDate = new Date();
